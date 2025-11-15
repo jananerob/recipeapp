@@ -1,5 +1,5 @@
 <h1>Pages#home</h1>
-<p>vvvvvvvvvvvvvvvvvvv</p>
+<p><%= current_user.inspect %></p>
 
 <% if  user_signed_in? %>
   <%= button_to 'Logout', destroy_user_session_path, method: :delete %>
