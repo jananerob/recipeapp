@@ -24,7 +24,17 @@ class RecipesController < ApplicationController
     @recipe = current_user.recipes.build(recipe_params)
 
     if @recipe.save
-      redirect_to @recipe, notice: "Recipe was successfully created."
+      begin
+        process_ingredients(params[:ingredients])
+        process_tags(params[:tags])
+        redirect_to @recipe, notice: "Recipe was successfully created."
+        
+      rescue => e
+
+        @recipe.errors.add(:base, "Error when saving ingredients/tags: #{e.message}")
+        @recipe.destroy
+        render :new, status: :unprocessable_entity
+      end
     else
       render :new, status: :unprocessable_entity
     end
@@ -55,4 +65,27 @@ class RecipesController < ApplicationController
     def recipe_params
       params.require(:recipe).permit(:title, :instructions, :prep_time, :cook_time, :is_private, :calories)
     end
+
+    def process_ingredients(ingredients_data)
+      ingredients_data.each do |key, data|
+        next if data[:name].blank?
+        ingredient = Ingredient.find_or_create_by!(name: data[:name].strip.capitalize)
+
+        @recipe.recipe_ingredients.create!(
+          ingredient: ingredient,
+          amount: data[:amount],
+          unit: data[:unit]
+        )        
+      end
+    end
+
+    def process_tags(tag_ids)
+      tag_ids = Array(tag_ids).compact_blank
+      tag_ids.each do |tag_id|
+        @recipe.recipe_tags.create!(
+          tag_id: tag_id
+        )        
+      end
+    end
+
 end

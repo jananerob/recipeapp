@@ -10,7 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_11_15_182437) do
+ActiveRecord::Schema[7.1].define(version: 2025_11_15_202330) do
+  create_table "ingredients", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "recipeingredients", force: :cascade do |t|
+    t.integer "recipe_id", null: false
+    t.integer "ingredient_id", null: false
+    t.float "amount"
+    t.integer "unit"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ingredient_id"], name: "index_recipeingredients_on_ingredient_id"
+    t.index ["recipe_id"], name: "index_recipeingredients_on_recipe_id"
+  end
+
   create_table "recipes", force: :cascade do |t|
     t.string "title"
     t.text "instructions"
@@ -24,6 +41,21 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_15_182437) do
     t.index ["user_id"], name: "index_recipes_on_user_id"
   end
 
+  create_table "recipetags", force: :cascade do |t|
+    t.integer "recipe_id", null: false
+    t.integer "tag_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["recipe_id"], name: "index_recipetags_on_recipe_id"
+    t.index ["tag_id"], name: "index_recipetags_on_tag_id"
+  end
+
+  create_table "tags", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -34,5 +66,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_15_182437) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "recipeingredients", "ingredients"
+  add_foreign_key "recipeingredients", "recipes"
   add_foreign_key "recipes", "users"
+  add_foreign_key "recipetags", "recipes"
+  add_foreign_key "recipetags", "tags"
 end
